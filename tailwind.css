@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@source "./safelist.txt";
+
+@plugin '@tailwindcss/forms';
+
+@variant dark (&:is(.dark *));
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+.disable-link {
+  pointer-events: none;
+}
+
+.picture-slider-container {
+  user-select: none;
+}

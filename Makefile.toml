@@ -1,0 +1,38 @@
+[tasks.tw]
+description = "Start Tailwind watcher"
+script = [
+  "npx @tailwindcss/cli@next --watch -i ./tailwind.css -o ./assets/css/lib/tailwind.css",
+]
+
+[tasks.docker]
+description = "Start Docker containers"
+script = ["docker compose up -d"]
+
+[tasks.wait_for_docker]
+description = "Wait for Docker services to be healthy"
+script = [
+  """
+    until [ "$(docker inspect --format '{{json .State.Health.Status}}' $(docker compose ps -q) | grep -v 'healthy' | wc -l)" -eq 0 ]; do
+        if [ -z "$(docker compose ps -q)" ]; then
+            echo 'No running containers. Waiting...';
+        else
+            echo 'Waiting for Docker containers to be healthy...';
+        fi
+        sleep 3;
+    done
+  """,
+]
+
+[tasks.axum]
+description = "Start Axum server"
+dependencies = ["wait_for_docker", "docker"]
+script = ["cargo watch -c -w src -w templates -x run"]
+
+[tasks.start]
+description = "Start all services (Tailwind, Docker, Axum)"
+run_task = { name = ["tw", "axum"], parallel = true }
+
+[tasks.stop]
+description = "Stop Docker containers"
+command = "docker"
+args = ["compose", "down"]
