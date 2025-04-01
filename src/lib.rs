@@ -1,4 +1,5 @@
 pub mod config;
+pub mod contanst;
 pub mod controllers;
 pub mod middlewares;
 pub mod models;

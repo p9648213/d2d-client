@@ -1,1 +1,2 @@
-pub mod home;
+pub mod auth_c;
+pub mod home_c;

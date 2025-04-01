@@ -13,6 +13,11 @@ async fn main() {
 
     let config = config::EnvConfig::parse();
 
+    let redis_client = redis::Client::open(config.redis_url.clone())
+        .expect("Error while trying to open the redis connection");
+
+    let redis_pool = redis_pool::RedisPool::from(redis_client);
+
     tracing::info!("Redis pool created");
 
     let pg_pool = postgres::create_pool(&config);
@@ -23,7 +28,7 @@ async fn main() {
         .await
         .unwrap();
 
-    let app = create_router(pg_pool, config);
+    let app = create_router(pg_pool, redis_pool, config);
 
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
 

@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Ad12345#
-      POSTGRES_DB: web-builder
+      POSTGRES_DB: d2d
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -21,6 +21,22 @@ services:
       - pgadmin:/var/lib/pgadmin
     depends_on:
       - postgres
+  redis:
+    image: redis
+    ports:
+      - 16379:6379
+    volumes:
+      - redisdata:/data
+    command: ["redis-server", "--save", "600", "1"]
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    restart: always
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight:/data
+    depends_on:
+      - redis
   nginx:
     build:
       context: ./docker/nginx
@@ -35,3 +51,5 @@ services:
 volumes:
   pgdata:
   pgadmin:
+  redisdata:
+  redisinsight:

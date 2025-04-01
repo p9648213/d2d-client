@@ -19,7 +19,3 @@
 .disable-link {
   pointer-events: none;
 }
-
-.picture-slider-container {
-  user-select: none;
-}

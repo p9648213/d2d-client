@@ -1,5 +1,13 @@
 use crate::{
-    config::EnvConfig, controllers::home::home, middlewares::csrf::csrf_middleware,
+    config::EnvConfig,
+    controllers::{
+        auth_c::{
+            get_login_page, get_register_page, google_callback, google_login, login, logout,
+            register,
+        },
+        home_c::get_home_page,
+    },
+    middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware},
     models::state::AppState,
 };
 use axum::{
@@ -7,10 +15,13 @@ use axum::{
     http::{HeaderValue, StatusCode, header},
     middleware::from_fn_with_state,
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
 };
 use axum_csrf::{CsrfConfig, CsrfLayer};
+use axum_session::{SessionConfig, SessionLayer, SessionStore};
+use axum_session_redispool::SessionRedisPool;
 use deadpool_postgres::Pool;
+use redis_pool::SingleRedisPool;
 use tower_http::set_header::SetResponseHeaderLayer;
 
 async fn ping() -> &'static str {
@@ -21,7 +32,11 @@ async fn fallback() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "Not Found")
 }
 
-pub async fn create_router(pg_pool: Pool, config: EnvConfig) -> Router {
+pub async fn create_router(
+    pg_pool: Pool,
+    redis_pool: SingleRedisPool,
+    config: EnvConfig,
+) -> Router {
     let cache_control_layer = SetResponseHeaderLayer::if_not_present(
         header::CACHE_CONTROL,
         HeaderValue::from_static("no-cache, no-store, must-revalidate"),
@@ -29,16 +44,43 @@ pub async fn create_router(pg_pool: Pool, config: EnvConfig) -> Router {
 
     let cfrs_key = config.csrf_encrypt_key.as_bytes();
 
+    let session_key = config.session_encrypt_key.as_bytes();
+
+    let database_key = config.database_encrypt_key.as_bytes();
+
     let cfrs_config = CsrfConfig::default().with_key(Some(
         axum_csrf::Key::try_from(cfrs_key).expect("Error while creating csrf key"),
     ));
 
+    let session_config = SessionConfig::default()
+        .with_key(
+            axum_session::Key::try_from(session_key).expect("Error while creating session key"),
+        )
+        .with_database_key(
+            axum_session::Key::try_from(database_key).expect("Error while creating session key"),
+        );
+
+    let session_store =
+        SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
+            .await
+            .expect("Error while creating session store");
+
     let app_state = AppState { pg_pool, config };
 
     Router::new()
-        .route("/", get(home))
+        .route("/", get(get_home_page))
+        .route("/auth/login", post(login))
+        .route("/auth/register", post(register))
+        .route("/auth/logout", post(logout))
+        .route("/auth/login", get(get_login_page))
+        .route("/auth/register", get(get_register_page))
+        .route("/auth/google/login", get(google_login))
+        .route("/auth/google/callback", get(google_callback))
+        .layer(from_fn_with_state(app_state.clone(), auth_middleware))
         .layer(from_fn_with_state(app_state.clone(), csrf_middleware))
         .layer(CsrfLayer::new(cfrs_config))
+        .layer(SessionLayer::new(session_store))
+        .with_state(app_state.clone())
         .layer(cache_control_layer)
         .route("/ping", get(ping))
         .fallback(fallback)
