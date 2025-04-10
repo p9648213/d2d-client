@@ -1,9 +1,24 @@
-use axum::response::Html;
+use axum::{
+    Extension,
+    response::{Html, IntoResponse},
+};
 use axum_csrf::CsrfToken;
 
-use crate::views::home_v::render_home_page;
+use crate::{
+    middlewares::auth_mw::UserAuth,
+    views::home_v::{HomePageProps, render_home_page},
+};
 
-pub async fn get_home_page(token: CsrfToken) -> Html<String> {
+pub async fn get_home_page(
+    Extension(user_auth): Extension<UserAuth>,
+    token: CsrfToken,
+) -> impl IntoResponse {
     let authenticity_token = token.authenticity_token().unwrap_or("".to_owned());
-    Html(render_home_page(authenticity_token).0)
+
+    let props = HomePageProps {
+        authenticity_token,
+        user_auth,
+    };
+
+    (token, Html(render_home_page(&props).0))
 }

@@ -73,7 +73,12 @@ pub async fn login(
     State(pg_pool): State<Pool>,
     Form(login_form): Form<LoginForm>,
 ) -> Result<impl IntoResponse, AppError> {
-    let row = User::get_user_by_email(&login_form.email, &pg_pool, vec!["id", "password"]).await?;
+    let row = User::get_user_by_email(
+        &login_form.email,
+        &pg_pool,
+        vec!["id", "password", "username", "image_url"],
+    )
+    .await?;
 
     if let Some(row) = row {
         let user = User::try_from(&row, None);
@@ -88,8 +93,16 @@ pub async fn login(
             AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "Server error")
         })?;
 
+        let user_name = user.username.unwrap_or("User".to_owned());
+
+        let user_image = user
+            .image_url
+            .unwrap_or("/assets/images/default-user.webp".to_owned());
+
         if compare_password(&login_form.password, &user_password)? {
             session.set("user-id", user_id);
+            session.set("user-image", user_image);
+            session.set("user-name", user_name);
 
             let response = Response::builder()
                 .status(StatusCode::OK)
@@ -321,12 +334,32 @@ pub async fn google_callback(
 
     let account_id = google_user.sub;
 
-    let row = User::get_user_by_account_id(&account_id, &pg_pool, vec!["id"]).await?;
+    let row =
+        User::get_user_by_account_id(&account_id, &pg_pool, vec!["id", "username", "image_url"])
+            .await?;
 
     match row {
         Some(row) => {
             let user = User::try_from(&row, None);
-            session.set("user-id", user.id);
+
+            let user_id = user.id.ok_or_else(|| {
+                tracing::error!("No id column or value is null");
+                AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "Server error")
+            })?;
+
+            let user_name = user.username.ok_or_else(|| {
+                tracing::error!("No username column or value is null");
+                AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "Server error")
+            })?;
+
+            let user_image = user.image_url.ok_or_else(|| {
+                tracing::error!("No image_url column or value is null");
+                AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "Server error")
+            })?;
+
+            session.set("user-id", user_id);
+            session.set("user-name", user_name);
+            session.set("user-image", user_image);
         }
         None => {
             if let Some(email) = google_user.email {
@@ -358,6 +391,8 @@ pub async fn google_callback(
                         }
 
                         session.set("user-id", user_id);
+                        session.set("user-name", &google_user.name);
+                        session.set("user-image", &google_user.picture);
                     }
                     None => {
                         let uuid = Uuid::new_v4().to_string();
@@ -380,6 +415,8 @@ pub async fn google_callback(
                         }
 
                         session.set("user-id", uuid);
+                        session.set("user-name", &google_user.name);
+                        session.set("user-image", &google_user.picture);
                     }
                 }
             } else {
@@ -403,6 +440,8 @@ pub async fn google_callback(
                 }
 
                 session.set("user-id", uuid);
+                session.set("user-name", &google_user.name);
+                session.set("user-image", &google_user.picture);
             }
         }
     };
