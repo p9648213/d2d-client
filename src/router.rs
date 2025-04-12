@@ -1,9 +1,7 @@
 use crate::{
 	config::EnvConfig,
 	controllers::{
-		auth_c::{
-			get_login_page, get_register_page, google_callback, google_login, login, logout, register,
-		},
+		auth_c::{google_callback, google_login, login, logout, register},
 		home_c::get_home_page,
 	},
 	middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware},
@@ -64,15 +62,16 @@ pub async fn create_router(
 
 	let app_state = AppState { pg_pool, config };
 
-	Router::new()
-		.route("/", get(get_home_page))
+	let auth_route = Router::new()
 		.route("/auth/login", post(login))
 		.route("/auth/register", post(register))
 		.route("/auth/logout", post(logout))
-		.route("/auth/login", get(get_login_page))
-		.route("/auth/register", get(get_register_page))
 		.route("/auth/google/login", get(google_login))
-		.route("/auth/google/callback", get(google_callback))
+		.route("/auth/google/callback", get(google_callback));
+
+	Router::new()
+		.route("/", get(get_home_page))
+		.merge(auth_route)
 		.layer(from_fn_with_state(app_state.clone(), auth_middleware))
 		.layer(from_fn_with_state(app_state.clone(), csrf_middleware))
 		.layer(CsrfLayer::new(cfrs_config))
