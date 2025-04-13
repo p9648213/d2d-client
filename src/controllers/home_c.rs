@@ -6,7 +6,7 @@ use axum_csrf::CsrfToken;
 
 use crate::{
 	middlewares::auth_mw::UserAuth,
-	views::home_v::{HomePageProps, render_home_page},
+	views::pages::home_v::{HomePageProps, render_home_page},
 };
 
 pub async fn get_home_page(

@@ -11,7 +11,7 @@ axum_csrf = { version = "0.11.0", features = ["layer"] }
 axum_session = { version = "0.16.0" }
 axum_session_redispool = { version = "0.6.0" }
 chrono = "0.4.40"
-clap = { version = "4.5.35", features = ["derive", "env"] }
+clap = { version = "4.5.36", features = ["derive", "env"] }
 cookie = "0.18.1"
 deadpool-postgres = "0.14.1"
 dotenvy = "0.15.7"

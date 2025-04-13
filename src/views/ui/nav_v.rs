@@ -1,27 +1,8 @@
-use crate::{middlewares::auth_mw::UserAuth, views::head_v::render_header};
-
-pub struct HomePageProps {
-	pub authenticity_token: String,
-	pub user_auth: UserAuth,
-}
-
-pub fn render_home_page(props: &HomePageProps) -> maud::Markup {
-	maud::html! {
-		(maud::DOCTYPE)
-		(render_header())
-		body class="bg-neutral-200" hx-boost="true" {
-			title {
-				"D2D"
-			}
-			(render_navbar(&props.authenticity_token, &props.user_auth))
-			div id="toast" {}
-		}
-	}
-}
+use crate::middlewares::auth_mw::UserAuth;
 
 pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Markup {
 	maud::html! {
-		nav class="flex justify-between items-center py-4 px-10 shadow bg-neutral-50" {
+		nav class="flex justify-between items-center bg-neutral-50 shadow px-10 py-4" {
 			div {
 				"Logo"
 			}
@@ -36,8 +17,8 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 	          setupUserDropdown()
 	          </script>
 	          "#))
-						div id="user-dropdown" class="flex gap-2 items-center cursor-pointer" {
-							img class="w-7 h-7 rounded-full" src=(user_info.image_url) alt="avatar";
+						div id="user-dropdown" class="flex items-center gap-2 cursor-pointer" {
+							img class="rounded-full w-7 h-7" src=(user_info.image_url) alt="avatar";
 							span class="capitalize" {
 								(user_info.username)
 							}
@@ -47,7 +28,7 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 						}
 						div
 						id="user-dropdown-options"
-						class="hidden absolute right-0 top-10 py-2 px-3 bg-white rounded-md border border-neutral-600"
+						class="hidden top-10 right-0 absolute bg-white px-3 py-2 border border-neutral-600 rounded-md"
 						{
 							form hx-post="/auth/logout" hx-swap="none" {
 								button type="submit" class="cursor-pointer" {
@@ -68,20 +49,20 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 	          "#))
 						button
 						id="sign-in-button"
-						class="py-1.5 px-3 bg-white rounded-md shadow cursor-pointer"
+						class="bg-white shadow px-3 py-1.5 rounded-md cursor-pointer"
 						style="box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgb(209, 213, 219) 0px 0px 0px 1px inset"
 						{
 							"Sign in"
 						}
 						div
 						id="login-modal"
-						class="hidden fixed inset-0 justify-center items-center w-full h-full bg-slate-200/60"
+						class="hidden fixed inset-0 justify-center items-center bg-slate-200/60 w-full h-full"
 						{
-							div class="relative p-4 bg-white rounded-md shadow w-100" {
-								button id="login-close-button" class="absolute top-4 right-4 cursor-pointer" {
+							div class="relative bg-white shadow p-4 rounded-md w-100" {
+								button id="login-close-button" class="top-4 right-4 absolute cursor-pointer" {
 									"X"
 								}
-								div class="mb-4 text-lg font-bold text-center" {
+								div class="mb-4 font-bold text-lg text-center" {
 									"Login"
 								}
 								form
@@ -96,21 +77,21 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 											label for="email-address" {
 												"Email address: "
 											}
-											input class="w-full rounded-md" name="email" type="email" autocomplete="email" placeholder="Email address";
+											input class="rounded-md w-full" name="email" type="email" autocomplete="email" placeholder="Email address";
 										}
 										div class="flex flex-col gap-2" {
 											label for="password" {
 												"Password: "
 											}
-											input class="w-full rounded-md" name="password" type="password" autocomplete="current-password" placeholder="Password";
+											input class="rounded-md w-full" name="password" type="password" autocomplete="current-password" placeholder="Password";
 										}
-										button type="submit" class="py-1.5 w-full rounded-md border cursor-pointer bg-neutral-100 border-neutral-900" {
+										button type="submit" class="bg-neutral-100 py-1.5 border border-neutral-900 rounded-md w-full cursor-pointer" {
 											"Login"
 										}
 										a href="/auth/google/login" hx-disable {
 											button
 											type="button"
-											class="flex gap-2 justify-center items-center py-1.5 w-full rounded-md border cursor-pointer bg-neutral-100 border-neutral-900"
+											class="flex justify-center items-center gap-2 bg-neutral-100 py-1.5 border border-neutral-900 rounded-md w-full cursor-pointer"
 											{
 												div class="h-6" {
 													img class="h-full" src="/assets/images/google.webp" alt="google";
@@ -120,20 +101,20 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 										}
 									}
 								}
-								button id="register-link" class="mt-2 cursor-pointer text-sky-600" {
+								button id="register-link" class="mt-2 text-sky-600 cursor-pointer" {
 									"Not a member? Register"
 								}
 							}
 						}
 						div
 						id="register-modal"
-						class="hidden fixed inset-0 justify-center items-center w-full h-full bg-slate-200/60"
+						class="hidden fixed inset-0 justify-center items-center bg-slate-200/60 w-full h-full"
 						{
-							div class="relative p-4 bg-white rounded-md shadow w-100" {
-								button id="register-close-button" class="absolute top-4 right-4 cursor-pointer" {
+							div class="relative bg-white shadow p-4 rounded-md w-100" {
+								button id="register-close-button" class="top-4 right-4 absolute cursor-pointer" {
 									"X"
 								}
-								div class="mb-4 text-lg font-bold text-center" {
+								div class="mb-4 font-bold text-lg text-center" {
 									"Register"
 								}
 								form
@@ -148,26 +129,26 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 											label for="username" {
 												"Username: "
 											}
-											input class="w-full rounded-md" name="username" type="text" autocomplete="on" placeholder="Username";
+											input class="rounded-md w-full" name="username" type="text" autocomplete="on" placeholder="Username";
 										}
 										div class="flex flex-col gap-2" {
 											label for="email-address" {
 												"Email address: "
 											}
-											input class="w-full rounded-md" name="email" type="email" autocomplete="email" placeholder="Email address";
+											input class="rounded-md w-full" name="email" type="email" autocomplete="email" placeholder="Email address";
 										}
 										div class="flex flex-col gap-2" {
 											label for="password" {
 												"Password: "
 											}
-											input class="w-full rounded-md" name="password" type="password" autocomplete="current-password" placeholder="Password";
+											input class="rounded-md w-full" name="password" type="password" autocomplete="current-password" placeholder="Password";
 										}
-										button type="submit" class="py-1.5 w-full rounded-md border cursor-pointer bg-neutral-100 border-neutral-900" {
+										button type="submit" class="bg-neutral-100 py-1.5 border border-neutral-900 rounded-md w-full cursor-pointer" {
 											"Register"
 										}
 									}
 								}
-								button id="login-link" class="mt-2 cursor-pointer text-sky-600" {
+								button id="login-link" class="mt-2 text-sky-600 cursor-pointer" {
 									"Have an account? Login"
 								}
 							}

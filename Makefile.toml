@@ -1,7 +1,7 @@
 [tasks.tw]
 description = "Start Tailwind watcher"
 script = [
-  "npx @tailwindcss/cli@next --watch -i ./tailwind.css -o ./assets/css/lib/tailwind.css",
+  "npx @tailwindcss/cli -i ./tailwind.css -o ./assets/css/lib/tailwind.css --watch",
 ]
 
 [tasks.docker]

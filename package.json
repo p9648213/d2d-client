@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "tw": "npx @tailwindcss/cli@next -i ./tailwind.css -o ./assets/css/lib/tailwind.css --watch",
-    "minify:css": "npx @tailwindcss/cli@next -i ./assets/css/lib/taiwind.css -o ./assets/css/lib/tailwind.css --minify",
+    "tw": "npx @tailwindcss/cli -i ./tailwind.css -o ./assets/css/lib/tailwind.css --watch",
+    "minify:css": "npx @tailwindcss/cli -i ./assets/css/lib/taiwind.css -o ./assets/css/lib/tailwind.css --minify",
     "minify:js": "node minify.js"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-pub fn render_header() -> maud::Markup {
+pub fn render_head() -> maud::Markup {
 	maud::html! {
 		head{
 			meta charset="UTF-8";

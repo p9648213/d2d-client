@@ -1,2 +1,2 @@
-pub mod head_v;
-pub mod home_v;
+pub mod pages;
+pub mod ui;
