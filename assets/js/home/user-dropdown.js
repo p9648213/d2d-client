@@ -4,7 +4,34 @@ export function setupUserDropdown() {
     "user-dropdown-options"
   );
 
+  function closeDropDown() {
+    user_dropdown_options.classList.remove("flex");
+    user_dropdown_options.classList.add("hidden");
+  }
+
+  function openDropDown() {
+    user_dropdown_options.classList.remove("hidden");
+    user_dropdown_options.classList.add("flex");
+  }
+
   user_dropdown.addEventListener("click", () => {
-    user_dropdown_options.classList.toggle("hidden");
+    if (user_dropdown_options.classList.contains("hidden")) {
+      openDropDown();
+    } else {
+      closeDropDown();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (
+      !user_dropdown_options.contains(event.target) &&
+      !user_dropdown.contains(event.target)
+    ) {
+      if (user_dropdown_options.classList.contains("flex")) {
+        closeDropDown();
+      }
+    } else if (event.target.name == "dropdown-item") {
+      closeDropDown();
+    }
   });
 }
