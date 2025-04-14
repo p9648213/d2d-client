@@ -38,11 +38,3 @@ pub async fn auth_middleware(
 		Ok(next.run(request).await.into_response())
 	}
 }
-
-// fn redirect_307(location: &str) -> Response {
-//     Response::builder()
-//         .status(StatusCode::TEMPORARY_REDIRECT)
-//         .header(header::LOCATION, location)
-//         .body(axum::body::Body::empty())
-//         .unwrap()
-// }
