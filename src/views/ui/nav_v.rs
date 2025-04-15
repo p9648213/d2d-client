@@ -3,7 +3,7 @@ use crate::middlewares::auth_mw::UserAuth;
 pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Markup {
 	maud::html! {
 		nav class="flex justify-between items-center bg-neutral-50 shadow px-10 py-4" {
-			button hx-get="/section/home" hx-target="main" hx-push-url="/" {
+			a href="/" hx-target="main" {
 				"Logo"
 			}
 			div class="relative" {
@@ -11,12 +11,10 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 					Some(user_info) => {
 						(maud::PreEscaped(r#"
 							<script defer type="module">
-								import {
-									setupUserDropdown
-								} from "/assets/js/home/user-dropdown.js"
+								import { setupUserDropdown } from "/assets/js/home/user-dropdown.js"
 								setupUserDropdown()
 							</script>
-	          "#))
+	          			"#))
 						div id="user-dropdown" class="flex items-center gap-2 cursor-pointer" {
 							img class="rounded-full w-7 h-7" src=(user_info.image_url) alt="avatar";
 							span class="capitalize" {
@@ -30,11 +28,10 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 							id="user-dropdown-options"
 							class="hidden top-10 right-0 absolute flex-col gap-1 bg-white px-3 py-2 border border-neutral-600 rounded-md"
 						{
-							button
+							a
 								name="dropdown-item"
-								hx-get="/section/profile"
+								href="/profile"
 								hx-target="main"
-								hx-push-url="/profile"
 								class="hover:opacity-50 text-start"
 							{
 								"Profile"
@@ -50,12 +47,10 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
 					None => {
 						(maud::PreEscaped(r#"
 							<script defer type="module">
-								import {
-									setupAuthModal
-								} from "/assets/js/home/auth-modal.js"
+								import { setupAuthModal} from "/assets/js/home/auth-modal.js"
 								setupAuthModal()
 							</script>
-	          "#))
+	          			"#))
 						button
 							id="sign-in-button"
 							class="bg-white shadow px-3 py-1.5 rounded-md"

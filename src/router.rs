@@ -4,7 +4,6 @@ use crate::{
 		auth_c::{google_callback, google_login, login, logout, register},
 		home_c::get_home_page,
 		profile_c::get_profile_page,
-		section_c::get_section,
 	},
 	middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware},
 	models::state::AppState,
@@ -52,7 +51,9 @@ pub async fn create_router(
 	));
 
 	let session_config = SessionConfig::default()
-		.with_key(axum_session::Key::try_from(session_key).expect("Error while creating session key"))
+		.with_key(
+			axum_session::Key::try_from(session_key).expect("Error while creating session key"),
+		)
 		.with_database_key(
 			axum_session::Key::try_from(database_key).expect("Error while creating session key"),
 		);
@@ -74,7 +75,6 @@ pub async fn create_router(
 	Router::new()
 		.route("/", get(get_home_page))
 		.route("/profile", get(get_profile_page))
-		.route("/section/{section}", get(get_section))
 		.merge(auth_route)
 		.layer(from_fn_with_state(app_state.clone(), auth_middleware))
 		.layer(from_fn_with_state(app_state.clone(), csrf_middleware))

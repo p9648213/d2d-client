@@ -27,6 +27,13 @@ pub fn render_profile_page(props: &ProfilePageProps) -> maud::Markup {
 
 pub fn render_profile_section() -> maud::Markup {
 	maud::html! {
-		div { "Profile" }
+		div class="flex gap-5 p-6 bg-white rounded-md border border-neutral-600 w-full max-w-[70%]" {
+			div class="flex-1 p-4 border border-neutral-600 rounded-md" {
+				"Profile"
+			}
+			div class="flex-3 p-4 border border-neutral-600 rounded-md" {
+				"User Info"
+			}
+		 }
 	}
 }
