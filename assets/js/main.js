@@ -58,7 +58,7 @@ function toast({ message = "", type = "info", duration = 3000 }) {
   }
 }
 
-window.addEventListener("toastmessage", function(event) {
+window.addEventListener("toastmessage", function (event) {
   if (event?.detail?.type === "success") {
     toast({
       message: event?.detail?.message,
@@ -68,8 +68,12 @@ window.addEventListener("toastmessage", function(event) {
 });
 
 htmx.config.defaultSettleDelay = 0;
+htmx.config.getCacheBusterParam = true;
+htmx.config.selfRequestsOnly = true;
+htmx.config.historyCacheSize = 0;
+htmx.config.allowEval = false;
 
-window.addEventListener("htmx:beforeRequest", function() {
+window.addEventListener("htmx:beforeRequest", function () {
   NProgress.start();
 
   const loginLinkEl = document.getElementById("login-link");
@@ -84,7 +88,7 @@ window.addEventListener("htmx:beforeRequest", function() {
   }
 });
 
-window.addEventListener("htmx:afterRequest", function(event) {
+window.addEventListener("htmx:afterRequest", function (event) {
   const loginLinkEl = document.getElementById("login-link");
   const registerLinkEl = document.getElementById("register-link");
 
@@ -108,17 +112,16 @@ window.addEventListener("htmx:afterRequest", function(event) {
   }
 });
 
-window.addEventListener("htmx:configRequest", function(event) {
+window.addEventListener("htmx:configRequest", function (event) {
   if (event.detail.verb !== "get") {
     event.detail.headers["X-Csrf-Protection"] = "1";
   }
 });
 
-window.addEventListener("htmx:afterSettle", function() {
+window.addEventListener("htmx:afterSettle", function () {
   NProgress.done();
 });
 
-window.addEventListener("htmx:historyRestore", (_) => {
-  document.body.style.visibility = "hidden";
-  window.location.reload();
+window.addEventListener("htmx:historyCacheMiss", (_) => {
+  window.location.href = "/";
 });

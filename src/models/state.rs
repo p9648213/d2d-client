@@ -5,6 +5,6 @@ use crate::config::EnvConfig;
 
 #[derive(Clone, FromRef)]
 pub struct AppState {
-	pub pg_pool: Pool,
-	pub config: EnvConfig,
+    pub pg_pool: Pool,
+    pub config: EnvConfig,
 }
