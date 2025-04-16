@@ -70,8 +70,8 @@ window.addEventListener("toastmessage", function (event) {
 htmx.config.defaultSettleDelay = 0;
 htmx.config.getCacheBusterParam = true;
 htmx.config.selfRequestsOnly = true;
-htmx.config.historyCacheSize = 0;
-htmx.config.allowEval = false;
+htmx.config.historyCacheSize = 0;;
+htmx.config.refreshOnHistoryMiss = true;
 
 window.addEventListener("htmx:beforeRequest", function () {
   NProgress.start();
@@ -120,8 +120,4 @@ window.addEventListener("htmx:configRequest", function (event) {
 
 window.addEventListener("htmx:afterSettle", function () {
   NProgress.done();
-});
-
-window.addEventListener("htmx:historyCacheMiss", (_) => {
-  window.location.href = "/";
 });
