@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::{
     config::EnvConfig,
     controllers::{
@@ -9,18 +11,15 @@ use crate::{
     models::state::AppState,
 };
 use axum::{
-    Router,
-    http::{HeaderValue, StatusCode, header},
-    middleware::from_fn_with_state,
-    response::IntoResponse,
-    routing::{get, post},
+    body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::IntoResponse, routing::{get, post}, Router
 };
 use axum_csrf::{CsrfConfig, CsrfLayer};
 use axum_session::{SessionConfig, SessionLayer, SessionStore};
 use axum_session_redispool::SessionRedisPool;
 use deadpool_postgres::Pool;
 use redis_pool::SingleRedisPool;
-use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::{classify::ServerErrorsFailureClass, set_header::SetResponseHeaderLayer, trace::TraceLayer};
+use tracing::Span;
 
 async fn ping() -> &'static str {
     "pong"
@@ -84,4 +83,32 @@ pub async fn create_router(
         .layer(cache_control_layer)
         .route("/ping", get(ping))
         .fallback(fallback)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(|_: &Request<Body>| tracing::info_span!("http-request"))
+                .on_request(on_request)
+                .on_response(on_response)
+                .on_failure(on_failure),
+        )
+}
+
+
+fn on_request(request: &Request<Body>, _: &Span) {
+    tracing::info!(
+        "-> Request : method {} path {}",
+        request.method(),
+        request.uri().path()
+    )
+}
+
+fn on_response(response: &Response<Body>, latency: Duration, _: &Span) {
+    tracing::info!(
+        "<- Response: status {} in {:?}",
+        response.status(),
+        latency
+    )
+}
+
+fn on_failure(error: ServerErrorsFailureClass, latency: Duration, _: &Span) {
+    tracing::error!("-x- Request failed: {:?} after {:?}", error, latency)
 }

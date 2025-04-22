@@ -12,7 +12,7 @@ pub fn render_home_page(props: &HomePageProps) -> maud::Markup {
     maud::html! {
         (maud::DOCTYPE)
         (render_head())
-        body class="flex flex-col bg-neutral-200" hx-boost="true" {
+        body class="flex flex-col bg-neutral-200 text-sm" hx-boost="true" {
             title {
                 "D2D | Home"
             }

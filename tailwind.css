@@ -29,3 +29,15 @@ body {
 .disable-link {
   pointer-events: none;
 }
+
+input::placeholder {
+  font-size: 14px;
+}
+
+input[type="text"] {
+  font-size: 14px;
+}
+
+input[type="email"] {
+  font-size: 14px;
+}
