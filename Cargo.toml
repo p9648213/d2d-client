@@ -7,7 +7,6 @@ edition = "2024"
 argon2 = "0.5.3"
 axum = { version = "0.8.3", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["cookie", "multipart"] }
-axum_csrf = { version = "0.11.0", features = ["layer"] }
 axum_session = { version = "0.16.0" }
 axum_session_redispool = { version = "0.6.0" }
 chrono = "0.4.40"

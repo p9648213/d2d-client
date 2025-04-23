@@ -1,9 +1,9 @@
 use axum::{
     Extension,
     http::HeaderMap,
-    response::{Html, IntoResponse},
+    response::Html,
 };
-use axum_csrf::CsrfToken;
+
 use reqwest::StatusCode;
 
 use crate::{
@@ -14,9 +14,8 @@ use crate::{
 
 pub async fn get_profile_page(
     Extension(user_auth): Extension<UserAuth>,
-    token: CsrfToken,
     headers: HeaderMap,
-) -> Result<impl IntoResponse, AppError> {
+) -> Result<Html<String>, AppError> {
     if user_auth.0.is_none() {
         return Err(AppError::new(StatusCode::UNAUTHORIZED, "Unauthorized"));
     }
@@ -24,15 +23,13 @@ pub async fn get_profile_page(
     let boosted = headers.get("HX-Boosted");
 
     if boosted.is_some() {
-        return Ok(Html(render_profile_section().0).into_response());
+        return Ok(Html(render_profile_section().0));
     }
 
-    let authenticity_token = token.authenticity_token().unwrap_or("".to_owned());
 
     let props = ProfilePageProps {
-        authenticity_token,
         user_auth,
     };
 
-    Ok((token, Html(render_profile_page(&props).0)).into_response())
+    Ok(Html(render_profile_page(&props).0))
 }

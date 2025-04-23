@@ -4,7 +4,6 @@ use crate::{
 };
 
 pub struct ProfilePageProps {
-    pub authenticity_token: String,
     pub user_auth: UserAuth,
 }
 
@@ -16,7 +15,7 @@ pub fn render_profile_page(props: &ProfilePageProps) -> maud::Markup {
             title {
                 "D2D | Profile"
             }
-            (render_navbar(&props.authenticity_token, &props.user_auth))
+            (render_navbar(&props.user_auth))
             main class="flex flex-grow justify-center items-center"  {
                 (render_profile_section())
             }

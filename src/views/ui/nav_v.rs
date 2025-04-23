@@ -1,6 +1,6 @@
 use crate::middlewares::auth_mw::UserAuth;
 
-pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Markup {
+pub fn render_navbar(user_auth: &UserAuth) -> maud::Markup {
     maud::html! {
         nav class="flex justify-between items-center bg-neutral-50 shadow px-10 py-2.5" {
             a href="/" hx-target="main" {
@@ -40,7 +40,6 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
                                 button type="submit" {
                                     "Logout"
                                 }
-                                input type="hidden" name="authenticity_token" value=(authenticity_token);
                             }
                         }
                     },
@@ -75,7 +74,6 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
                                     hx-on-htmx-after-request="if(event.detail.successful) this.reset()"
                                     hx-disabled-elt="find button"
                                 {
-                                    input type="hidden" name="authenticity_token" value=(authenticity_token);
                                     div class="flex flex-col gap-4" {
                                         div class="flex flex-col gap-2" {
                                             label for="email-address" {
@@ -127,7 +125,6 @@ pub fn render_navbar(authenticity_token: &str, user_auth: &UserAuth) -> maud::Ma
                                     hx-on-htmx-after-request="if(event.detail.successful) this.reset()"
                                     hx-disabled-elt="find button"
                                 {
-                                    input type="hidden" name="authenticity_token" value=(authenticity_token);
                                     div class="flex flex-col gap-4" {
                                         div class="flex flex-col gap-2" {
                                             label for="username" {

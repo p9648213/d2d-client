@@ -13,7 +13,6 @@ use crate::{
 use axum::{
     body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::IntoResponse, routing::{get, post}, Router
 };
-use axum_csrf::{CsrfConfig, CsrfLayer};
 use axum_session::{SessionConfig, SessionLayer, SessionStore};
 use axum_session_redispool::SessionRedisPool;
 use deadpool_postgres::Pool;
@@ -39,15 +38,9 @@ pub async fn create_router(
         HeaderValue::from_static("no-cache, no-store, must-revalidate"),
     );
 
-    let cfrs_key = config.csrf_encrypt_key.as_bytes();
-
     let session_key = config.session_encrypt_key.as_bytes();
 
     let database_key = config.database_encrypt_key.as_bytes();
-
-    let cfrs_config = CsrfConfig::default().with_key(Some(
-        axum_csrf::Key::try_from(cfrs_key).expect("Error while creating csrf key"),
-    ));
 
     let session_config = SessionConfig::default()
         .with_key(
@@ -72,12 +65,11 @@ pub async fn create_router(
         .route("/auth/google/callback", get(google_callback));
 
     Router::new()
-        .route("/", get(get_home_page))
         .route("/profile", get(get_profile_page))
-        .merge(auth_route)
         .layer(from_fn_with_state(app_state.clone(), auth_middleware))
+        .merge(auth_route)
+        .route("/", get(get_home_page))
         .layer(from_fn_with_state(app_state.clone(), csrf_middleware))
-        .layer(CsrfLayer::new(cfrs_config))
         .layer(SessionLayer::new(session_store))
         .with_state(app_state.clone())
         .layer(cache_control_layer)

@@ -4,7 +4,6 @@ use crate::{
 };
 
 pub struct HomePageProps {
-    pub authenticity_token: String,
     pub user_auth: UserAuth,
 }
 
@@ -16,7 +15,7 @@ pub fn render_home_page(props: &HomePageProps) -> maud::Markup {
             title {
                 "D2D | Home"
             }
-            (render_navbar(&props.authenticity_token, &props.user_auth))
+            (render_navbar(&props.user_auth))
             main class="flex flex-grow justify-center items-center"  {
                 (render_home_section())
             }
