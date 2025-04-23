@@ -11,13 +11,19 @@ use crate::{
     models::state::AppState,
 };
 use axum::{
-    body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::IntoResponse, routing::{get, post}, Router
+    Router,
+    body::Body,
+    http::{HeaderValue, Request, Response, StatusCode, header},
+    middleware::from_fn_with_state,
+    response::IntoResponse,
+    routing::{get, post},
 };
-use axum_session::{SessionConfig, SessionLayer, SessionStore};
-use axum_session_redispool::SessionRedisPool;
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_redis_bb8_pool::{SessionRedisPool, SessionRedisSessionStore};
 use deadpool_postgres::Pool;
-use redis_pool::SingleRedisPool;
-use tower_http::{classify::ServerErrorsFailureClass, set_header::SetResponseHeaderLayer, trace::TraceLayer};
+use tower_http::{
+    classify::ServerErrorsFailureClass, set_header::SetResponseHeaderLayer, trace::TraceLayer,
+};
 use tracing::Span;
 
 async fn ping() -> &'static str {
@@ -30,7 +36,7 @@ async fn fallback() -> impl IntoResponse {
 
 pub async fn create_router(
     pg_pool: Pool,
-    redis_pool: SingleRedisPool,
+    redis_pool: SessionRedisPool,
     config: EnvConfig,
 ) -> Router {
     let cache_control_layer = SetResponseHeaderLayer::if_not_present(
@@ -51,7 +57,7 @@ pub async fn create_router(
         );
 
     let session_store =
-        SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
+        SessionRedisSessionStore::new(Some(redis_pool), session_config)
             .await
             .expect("Error while creating session store");
 
@@ -65,10 +71,10 @@ pub async fn create_router(
         .route("/auth/google/callback", get(google_callback));
 
     Router::new()
-        .route("/profile", get(get_profile_page))
-        .layer(from_fn_with_state(app_state.clone(), auth_middleware))
-        .merge(auth_route)
         .route("/", get(get_home_page))
+        .route("/profile", get(get_profile_page))
+        .merge(auth_route)
+        .layer(from_fn_with_state(app_state.clone(), auth_middleware))
         .layer(from_fn_with_state(app_state.clone(), csrf_middleware))
         .layer(SessionLayer::new(session_store))
         .with_state(app_state.clone())
@@ -84,7 +90,6 @@ pub async fn create_router(
         )
 }
 
-
 fn on_request(request: &Request<Body>, _: &Span) {
     tracing::info!(
         "-> Request : method {} path {}",
@@ -94,11 +99,7 @@ fn on_request(request: &Request<Body>, _: &Span) {
 }
 
 fn on_response(response: &Response<Body>, latency: Duration, _: &Span) {
-    tracing::info!(
-        "<- Response: status {} in {:?}",
-        response.status(),
-        latency
-    )
+    tracing::info!("<- Response: status {} in {:?}", response.status(), latency)
 }
 
 fn on_failure(error: ServerErrorsFailureClass, latency: Duration, _: &Span) {

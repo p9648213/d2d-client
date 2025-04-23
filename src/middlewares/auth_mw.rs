@@ -1,7 +1,7 @@
 use crate::models::error::AppError;
 use axum::{extract::Request, middleware::Next, response::IntoResponse};
 use axum_session::Session;
-use axum_session_redispool::SessionRedisPool;
+use axum_session_redis_bb8_pool::SessionRedisPool;
 
 #[derive(Clone, Debug)]
 pub struct UserInfo {

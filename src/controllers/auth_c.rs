@@ -15,7 +15,7 @@ use axum::{
 };
 use axum_extra::extract::CookieJar;
 use axum_session::Session;
-use axum_session_redispool::SessionRedisPool;
+use axum_session_redis_bb8_pool::SessionRedisPool;
 use cookie::Cookie;
 use deadpool_postgres::Pool;
 use oauth2::{AuthorizationCode, PkceCodeChallenge, PkceCodeVerifier, Scope, TokenResponse};

@@ -1,3 +1,5 @@
+use axum_session_redis_bb8_pool::SessionRedisPool;
+use bb8_redis::bb8;
 use clap::Parser;
 use d2d_client::{
     config::{self},
@@ -13,10 +15,12 @@ async fn main() {
 
     let config = config::EnvConfig::parse();
 
-    let redis_client = redis::Client::open(config.redis_url.clone())
-        .expect("Error while trying to open the redis connection");
+    // let redis_client = redis::Client::open(config.redis_url.clone())
+    //     .expect("Error while trying to open the redis connection");
 
-    let redis_pool = redis_pool::RedisPool::from(redis_client);
+    let manager = bb8_redis::RedisConnectionManager::new(config.redis_url.clone()).unwrap();
+
+    let redis_pool = bb8::Pool::builder().build(manager).await.unwrap();
 
     tracing::info!("Redis pool created");
 
@@ -27,8 +31,9 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", &config.port))
         .await
         .unwrap();
+    
 
-    let app = create_router(pg_pool, redis_pool, config);
+    let app = create_router(pg_pool, SessionRedisPool::try_from(redis_pool).unwrap(), config);
 
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
 

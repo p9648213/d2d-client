@@ -8,7 +8,8 @@ argon2 = "0.5.3"
 axum = { version = "0.8.3", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["cookie", "multipart"] }
 axum_session = { version = "0.16.0" }
-axum_session_redispool = { version = "0.6.0" }
+axum_session_redis_bb8_pool = "0.4.0"
+bb8-redis = "0.21.0"
 chrono = "0.4.40"
 clap = { version = "4.5.37", features = ["derive", "env"] }
 cookie = "0.18.1"
