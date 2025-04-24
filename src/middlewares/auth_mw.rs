@@ -1,6 +1,6 @@
 use crate::models::error::AppError;
 use axum::{extract::Request, middleware::Next, response::IntoResponse};
-use axum_session::Session;
+use axum_session::{Session, SessionNullPool};
 use axum_session_redispool::SessionRedisPool;
 
 #[derive(Clone, Debug)]
@@ -14,7 +14,7 @@ pub struct UserInfo {
 pub struct UserAuth(pub Option<UserInfo>);
 
 pub async fn auth_middleware(
-    session: Session<SessionRedisPool>,
+    session: Session<SessionNullPool>,
     mut request: Request,
     next: Next,
 ) -> Result<impl IntoResponse, AppError> {

@@ -10,18 +10,26 @@ use crate::{
     middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware},
     models::state::AppState,
 };
+use askama::Template;
 use axum::{
-    body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::IntoResponse, routing::{get, post}, Router
+    body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::{Html, IntoResponse}, routing::{get, post}, Router
 };
-use axum_session::{SessionConfig, SessionLayer, SessionStore};
+use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
 use axum_session_redispool::SessionRedisPool;
 use deadpool_postgres::Pool;
 use redis_pool::SingleRedisPool;
 use tower_http::{classify::ServerErrorsFailureClass, set_header::SetResponseHeaderLayer, trace::TraceLayer};
 use tracing::Span;
 
-async fn ping() -> &'static str {
-    "pong"
+#[derive(Template)]
+#[template(path = "index.html")]
+pub struct HomeTemplate {
+    count: i32,
+}
+
+
+async fn ping() -> Html<String> {
+    Html(HomeTemplate{count: 1}.render().unwrap())
 }
 
 async fn fallback() -> impl IntoResponse {
@@ -51,7 +59,7 @@ pub async fn create_router(
         );
 
     let session_store =
-        SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
+        SessionStore::<SessionNullPool>::new(None, session_config)
             .await
             .expect("Error while creating session store");
 
@@ -68,12 +76,12 @@ pub async fn create_router(
         .route("/", get(get_home_page))
         .route("/profile", get(get_profile_page))
         .merge(auth_route)
-        .layer(from_fn_with_state(app_state.clone(), auth_middleware))
         .layer(from_fn_with_state(app_state.clone(), csrf_middleware))
-        .layer(SessionLayer::new(session_store))
         .with_state(app_state.clone())
         .layer(cache_control_layer)
         .route("/ping", get(ping))
+        .layer(from_fn_with_state(app_state.clone(), auth_middleware))
+        .layer(SessionLayer::new(session_store))
         .fallback(fallback)
         .layer(
             TraceLayer::new_for_http()

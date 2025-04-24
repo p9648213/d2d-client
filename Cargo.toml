@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 argon2 = "0.5.3"
+askama = "0.14.0"
 axum = { version = "0.8.3", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["cookie", "multipart"] }
 axum_session = { version = "0.16.0" }
