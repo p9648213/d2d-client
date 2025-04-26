@@ -1,10 +1,6 @@
 use axum::{
-    Extension,
-    http::HeaderMap,
-    response::Html,
+    http::{HeaderMap, StatusCode}, response::Html, Extension
 };
-
-use reqwest::StatusCode;
 
 use crate::{
     middlewares::auth_mw::UserAuth,

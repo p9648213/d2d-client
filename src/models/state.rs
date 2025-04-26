@@ -1,7 +1,7 @@
 use axum::extract::FromRef;
 use deadpool_postgres::Pool;
 
-use crate::config::EnvConfig;
+use crate::utilities::config::EnvConfig;
 
 #[derive(Clone, FromRef)]
 pub struct AppState {

@@ -1,8 +1,8 @@
 use crate::{
-    config::EnvConfig,
     contanst::{COOKIE_AUTH_CODE_VERIFIER, COOKIE_AUTH_CSRF_STATE},
-    models::{error::AppError, user::User},
+    models::{error::AppError, user_db::User},
     utilities::{
+        config::EnvConfig,
         hash::{compare_password, hash_password},
         oauth::create_google_client,
     },
@@ -227,7 +227,7 @@ pub async fn google_callback(
     let http_client = oauth2::reqwest::ClientBuilder::new()
         .redirect(oauth2::reqwest::redirect::Policy::none())
         .build()
-        .expect("Client should build");
+        .unwrap();
 
     let token_response = client
         .exchange_code(code)

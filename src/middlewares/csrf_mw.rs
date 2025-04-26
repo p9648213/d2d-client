@@ -1,4 +1,4 @@
-use crate::{config::EnvConfig, models::error::AppError};
+use crate::{models::error::AppError, utilities::config::EnvConfig};
 use axum::{
     extract::{Request, State},
     http::{Method, StatusCode},

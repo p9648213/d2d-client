@@ -1,12 +1,14 @@
+use axum::http::StatusCode;
 use oauth2::{
     AuthUrl, Client, ClientId, ClientSecret, EmptyExtraTokenFields, EndpointNotSet, EndpointSet,
     RedirectUrl, RevocationErrorResponseType, StandardErrorResponse, StandardRevocableToken,
     StandardTokenIntrospectionResponse, StandardTokenResponse, TokenUrl,
     basic::{BasicClient, BasicErrorResponseType, BasicTokenType},
 };
-use reqwest::StatusCode;
 
-use crate::{config::EnvConfig, models::error::AppError};
+use crate::models::error::AppError;
+
+use super::config::EnvConfig;
 
 type GoogleClient = Client<
     StandardErrorResponse<BasicErrorResponseType>,

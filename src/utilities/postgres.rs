@@ -1,7 +1,7 @@
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use tokio_postgres::NoTls;
 
-use crate::config::EnvConfig;
+use super::config::EnvConfig;
 
 fn create_config(config: &EnvConfig) -> tokio_postgres::Config {
     let mut cfg = tokio_postgres::Config::new();
@@ -22,8 +22,5 @@ pub fn create_pool(config: &EnvConfig) -> Pool {
 
     let manager = Manager::from_config(pg_config, NoTls, manager_config);
 
-    Pool::builder(manager)
-        .max_size(16)
-        .build()
-        .expect("Failed to create pool")
+    Pool::builder(manager).max_size(16).build().unwrap()
 }

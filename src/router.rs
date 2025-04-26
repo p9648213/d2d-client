@@ -1,31 +1,40 @@
 use std::time::Duration;
 
 use crate::{
-    config::EnvConfig,
     controllers::{
         auth_c::{google_callback, google_login, login, logout, register},
         home_c::get_home_page,
         profile_c::get_profile_page,
     },
-    middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware},
+    middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware, log_mw::request_log},
     models::state::AppState,
+    utilities::config::EnvConfig,
 };
 use axum::{
-    body::Body, http::{header, HeaderValue, Request, Response, StatusCode}, middleware::from_fn_with_state, response::IntoResponse, routing::{get, post}, Router
+    Router,
+    body::Body,
+    http::{HeaderValue, StatusCode, header},
+    middleware::{from_fn, from_fn_with_state},
+    response::{IntoResponse, Response},
+    routing::{get, post},
 };
 use axum_session::{SessionConfig, SessionLayer, SessionStore};
 use axum_session_redispool::SessionRedisPool;
 use deadpool_postgres::Pool;
 use redis_pool::SingleRedisPool;
-use tower_http::{classify::ServerErrorsFailureClass, set_header::SetResponseHeaderLayer, trace::TraceLayer};
+use tower_http::{set_header::SetResponseHeaderLayer, trace::TraceLayer};
 use tracing::Span;
 
-async fn ping() -> &'static str {
-    "pong"
+async fn ping() -> StatusCode {
+    StatusCode::OK
 }
 
 async fn fallback() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "Not Found")
+}
+
+fn response_log(response: &Response<Body>, latency: Duration, _: &Span) {
+    tracing::info!("<- Response: status {} in {:?}", response.status(), latency)
 }
 
 pub async fn create_router(
@@ -38,22 +47,12 @@ pub async fn create_router(
         HeaderValue::from_static("no-cache, no-store, must-revalidate"),
     );
 
-    let session_key = config.session_encrypt_key.as_bytes();
-
-    let database_key = config.database_encrypt_key.as_bytes();
-
-    let session_config = SessionConfig::default()
-        .with_key(
-            axum_session::Key::try_from(session_key).expect("Error while creating session key"),
-        )
-        .with_database_key(
-            axum_session::Key::try_from(database_key).expect("Error while creating session key"),
-        );
+    let session_config = SessionConfig::default();
 
     let session_store =
         SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
             .await
-            .expect("Error while creating session store");
+            .unwrap();
 
     let app_state = AppState { pg_pool, config };
 
@@ -75,32 +74,6 @@ pub async fn create_router(
         .layer(cache_control_layer)
         .route("/ping", get(ping))
         .fallback(fallback)
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(|_: &Request<Body>| tracing::info_span!("http-request"))
-                .on_request(on_request)
-                .on_response(on_response)
-                .on_failure(on_failure),
-        )
-}
-
-
-fn on_request(request: &Request<Body>, _: &Span) {
-    tracing::info!(
-        "-> Request : method {} path {}",
-        request.method(),
-        request.uri().path()
-    )
-}
-
-fn on_response(response: &Response<Body>, latency: Duration, _: &Span) {
-    tracing::info!(
-        "<- Response: status {} in {:?}",
-        response.status(),
-        latency
-    )
-}
-
-fn on_failure(error: ServerErrorsFailureClass, latency: Duration, _: &Span) {
-    tracing::error!("-x- Request failed: {:?} after {:?}", error, latency)
+        .layer(TraceLayer::new_for_http().on_response(response_log))
+        .layer(from_fn(request_log))
 }
