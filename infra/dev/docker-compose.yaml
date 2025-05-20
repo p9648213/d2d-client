@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-      POSTGRES_DB: d2d
+      POSTGRES_DB: ${PG_DBNAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
   pgadmin:
@@ -48,13 +48,11 @@ services:
     build:
       context: ../../
       dockerfile: ./infra/dev/Dockerfile
-    ports:
-      - "8080:8080"
     env_file:
-      - .env    
+      - .env
     volumes:
       - ../../:/app
-      - cargo-target:/app/target 
+      - cargo-target:/app/target
     depends_on:
       - postgres
       - redis

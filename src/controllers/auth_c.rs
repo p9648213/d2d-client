@@ -33,6 +33,7 @@ pub struct RegisterForm {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub confirm_password: String,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -88,7 +89,7 @@ pub async fn login(
 
             let response = Response::builder()
                 .status(StatusCode::OK)
-                .header("HX-Location", "/")
+                .header("HX-Redirect", "/")
                 .body(axum::body::Body::empty())
                 .unwrap();
 
@@ -112,12 +113,20 @@ pub async fn register(
     Form(register_form): Form<RegisterForm>,
 ) -> impl IntoResponse {
     if register_form.email.is_empty()
-        || register_form.password.is_empty()
         || register_form.username.is_empty()
+        || register_form.password.is_empty()
+        || register_form.confirm_password.is_empty()
     {
         return Err(AppError::new(
             StatusCode::BAD_REQUEST,
             "Input can not be empty",
+        ));
+    }
+
+    if register_form.password != register_form.confirm_password {
+        return Err(AppError::new(
+            StatusCode::BAD_REQUEST,
+            "Passwords do not match",
         ));
     }
 
@@ -152,7 +161,7 @@ pub async fn logout(session: Session<SessionRedisPool>) -> Result<impl IntoRespo
 
     let response = Response::builder()
         .status(StatusCode::OK)
-        .header("HX-Location", "/")
+        .header("HX-Redirect", "/")
         .body(axum::body::Body::empty())
         .unwrap();
 

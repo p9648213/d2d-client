@@ -7,7 +7,7 @@ export function setupAuthModal() {
 
   const register_modal = document.getElementById("register-modal");
   const register_close_button = document.getElementById(
-    "register-close-button",
+    "register-close-button"
   );
   const register_link = document.getElementById("register-link");
 

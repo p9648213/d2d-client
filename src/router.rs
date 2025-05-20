@@ -4,7 +4,6 @@ use crate::{
     controllers::{
         auth_c::{google_callback, google_login, login, logout, register},
         home_c::get_home_page,
-        profile_c::get_profile_page,
     },
     middlewares::{auth_mw::auth_middleware, csrf_mw::csrf_middleware, log_mw::request_log},
     models::state::AppState,
@@ -63,9 +62,10 @@ pub async fn create_router(
         .route("/auth/google/login", get(google_login))
         .route("/auth/google/callback", get(google_callback));
 
+    let app_route = Router::new().route("/", get(get_home_page));
+
     Router::new()
-        .route("/", get(get_home_page))
-        .route("/profile", get(get_profile_page))
+        .merge(app_route)
         .merge(auth_route)
         .layer(from_fn_with_state(app_state.clone(), auth_middleware))
         .layer(from_fn_with_state(app_state.clone(), csrf_middleware))

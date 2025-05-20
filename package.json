@@ -5,11 +5,11 @@
     "minify:js": "node minify.js"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "4.1.4",
+    "@tailwindcss/cli": "4.1.7",
     "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/postcss": "4.1.4",
+    "@tailwindcss/postcss": "4.1.7",
     "postcss": "8.5.3",
-    "tailwindcss": "4.1.4",
+    "tailwindcss": "4.1.7",
     "uglify-js": "^3.19.3"
   }
 }

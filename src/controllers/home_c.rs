@@ -1,8 +1,5 @@
-use axum::{
-    Extension,
-    http::HeaderMap,
-    response::Html,
-};
+use axum::{Extension, http::HeaderMap, response::Html};
+use vy::IntoHtml;
 
 use crate::{
     middlewares::auth_mw::UserAuth,
@@ -16,12 +13,12 @@ pub async fn get_home_page(
     let boosted = headers.get("HX-Boosted");
 
     if boosted.is_some() {
-        return Html(render_home_section().0);
+        return Html(render_home_section().into_string());
     }
 
     let props = HomePageProps {
-        user_auth,
+        user_info: user_auth.0,
     };
 
-    Html(render_home_page(&props).0)
+    Html(render_home_page(&props).into_string())
 }

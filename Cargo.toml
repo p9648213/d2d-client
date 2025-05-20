@@ -5,30 +5,31 @@ edition = "2024"
 
 [dependencies]
 argon2 = "0.5.3"
-axum = { version = "0.8.3", features = ["macros"] }
+axum = { version = "0.8.4", features = ["macros"] }
 axum-extra = { version = "0.10.1", features = ["cookie", "multipart"] }
 axum_session = { version = "0.16.0" }
 axum_session_redispool = { version = "0.6.0" }
-clap = { version = "4.5.37", features = ["derive", "env"] }
+clap = { version = "4.5.38", features = ["derive", "env"] }
 cookie = "0.18.1"
 deadpool-postgres = "0.14.1"
 dotenvy = "0.15.7"
-maud = "0.27.0"
 oauth2 = "5.0.0"
 postgres-types = { version = "0.2.9", features = ["derive"] }
 redis = { version = "0.29.5" }
 redis_pool = "0.8.0"
 reqwest = { version = "0.12.15", features = ["json"] }
 serde = { version = "1.0.219", features = ["derive"] }
-tokio = { version = "1.44.2", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.45.0", features = ["macros", "rt-multi-thread"] }
 tokio-postgres = "0.7.13"
-tower-http = { version = "0.6.2", features = ["fs", "set-header", "trace"] }
+tower-http = { version = "0.6.4", features = ["fs", "set-header", "trace"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 uuid = { version = "1.16.0", features = ["v4"] }
+vy = "0.2.0"
 
 [profile.release]
 debug = false
 lto = true
 opt-level = "z"
 panic = 'abort'
+codegen-units = 1

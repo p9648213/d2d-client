@@ -1,4 +1,4 @@
-FROM rust:1.86.0-slim
+FROM rust:1.87.0-slim
 
 # Install dev dependencies
 RUN apt-get update && apt-get install -y \
@@ -15,6 +15,7 @@ RUN cargo install cargo-watch
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get update && apt-get install -y nodejs && \
     npm install -g @tailwindcss/cli && \
+    npm install -g nodemon && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

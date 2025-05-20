@@ -15,14 +15,14 @@
     WORKDIR /src
     
     # Download and extract nginx
-    RUN wget https://nginx.org/download/nginx-1.27.4.tar.gz && \
-        tar -xzf nginx-1.27.4.tar.gz
+    RUN wget https://nginx.org/download/nginx-1.28.0.tar.gz && \
+        tar -xzf nginx-1.28.0.tar.gz
     
     # Clone zstd module
     RUN git clone --depth=1 https://github.com/tokers/zstd-nginx-module.git
     
     # Configure and build nginx
-    WORKDIR /src/nginx-1.27.4
+    WORKDIR /src/nginx-1.28.0
     RUN ./configure \
         --add-module=../zstd-nginx-module \
         --with-http_gzip_static_module \
